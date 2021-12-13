@@ -1,3 +1,5 @@
 framework:
     mailer:
+        envelope:
+            sender: 'no-replay@someone.com'
         dsn: '%env(MAILER_DSN)%'
