@@ -6,6 +6,7 @@ use App\DTO\UserDto;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserManager
@@ -13,15 +14,18 @@ class UserManager
     private UserRepository $userRepository;
     private EntityManagerInterface $entityManager;
     private UserPasswordHasherInterface $passwordHasher;
+    private RegistrationEmailSender $emailSender;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
-        UserRepository $userRepository,
-        UserPasswordHasherInterface $passwordHasher
+        EntityManagerInterface      $entityManager,
+        UserRepository              $userRepository,
+        UserPasswordHasherInterface $passwordHasher,
+        RegistrationEmailSender     $emailSender
     ) {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
         $this->passwordHasher = $passwordHasher;
+        $this->emailSender = $emailSender;
     }
 
     public function registerUser(UserDto $userDto): void
@@ -40,6 +44,11 @@ class UserManager
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
+        try {
+            $this->emailSender->sendSuccessUserRegistration($user);
+        } catch (TransportExceptionInterface $e) {
+            //
+        }
     }
 
     public function isUserExistByEmail(string $email): bool
