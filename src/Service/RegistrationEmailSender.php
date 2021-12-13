@@ -37,7 +37,6 @@ class RegistrationEmailSender
             ->context([
                 'name' => $user->getFullName(),
                 'login' => $user->getEmail(),
-            ])
-            ->attach(fopen('./assets/img/img.png', 'r'), 'mail_pic');
+            ]);
     }
 }
